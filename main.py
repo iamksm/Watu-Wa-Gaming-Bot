@@ -28,13 +28,13 @@ def local_datetime(datetime_obj):
 
 __games__ = [
     (discord.ActivityType.playing, 'with iamksm'),
-    (discord.ActivityType.playing, "with El Chapo's Wife"),
+    (discord.ActivityType.playing, "with HOUDINI"),
     (discord.ActivityType.playing, 'with Bloody Actor'),
     (discord.ActivityType.playing, 'with BroChief'),
-    (discord.ActivityType.playing, 'with MnickM'),
+    (discord.ActivityType.playing, 'with N1ck'),
     (discord.ActivityType.playing, 'with Team Efficiency'),
     (discord.ActivityType.playing, 'with Peaches'),
-    (discord.ActivityType.playing, 'with 天皇 マーク'),
+    (discord.ActivityType.playing, 'with 天皇'),
     (discord.ActivityType.playing, 'with kyande'),
     (discord.ActivityType.playing, 'with LazyBri4n'),
     (discord.ActivityType.watching, 'over {guilds} Server'),
@@ -136,13 +136,6 @@ async def on_raw_reaction_add(payload):
 
         elif payload.emoji.name == 'starwars':
             role = discord.utils.get(guild.roles, name='Starwars Battlefront II')
-        
-        elif payload.emoji.name == 'fortnite':
-            role = discord.utils.get(guild.roles, name='Fortnite')
-
-        elif payload.emoji.name == 'eurotrack':
-            role = discord.utils.get(guild.roles, name='EuroTruck Simulator 2')
-
 
         else:
             role = discord.utils.get(guild.roles, name=payload.emoji.name)
@@ -157,6 +150,43 @@ async def on_raw_reaction_add(payload):
         else:
             print('Role not found.')
 
+    elif message_id == 836847840503267368:
+        guild_id = payload.guild_id
+        guild = discord.utils.find(lambda g: g.id == guild_id, client.guilds)
+
+        if payload.emoji.name == 'roblox':
+            role = discord.utils.get(guild.roles, name='Roblox')
+
+        elif payload.emoji.name == 'fortnite':
+            role = discord.utils.get(guild.roles, name='Fortnite')
+
+        elif payload.emoji.name == 'eurotruck':
+            role = discord.utils.get(guild.roles, name='EuroTruck Simulator 2')
+
+        elif payload.emoji.name == 'destiny2':
+            role = discord.utils.get(guild.roles, name='Destiny 2')
+
+        elif payload.emoji.name == 'minecraft':
+            role = discord.utils.get(guild.roles, name='Minecraft')
+
+        elif payload.emoji.name == 'paladins':
+            role = discord.utils.get(guild.roles, name='Paladins')
+
+        elif payload.emoji.name == 'chess':
+            role = discord.utils.get(guild.roles, name='Chess')
+
+        else:
+            role = discord.utils.get(guild.roles, name=payload.emoji.name)
+
+        if role:
+            member = payload.member
+            if member:
+                await member.add_roles(role)
+                print('done')
+            else:
+                print("Member Not found.")
+        else:
+            print('Role not found.')
 
 @client.event
 async def on_raw_reaction_remove(payload):
@@ -247,6 +277,45 @@ async def on_raw_reaction_remove(payload):
         else:
             print('Role not found.')
 
+    elif message_id == 836847840503267368:
+        guild_id = payload.guild_id
+        guild = discord.utils.find(lambda g: g.id == guild_id, client.guilds)
+
+        if payload.emoji.name == 'roblox':
+            role = discord.utils.get(guild.roles, name='Roblox')
+
+        elif payload.emoji.name == 'fortnite':
+            role = discord.utils.get(guild.roles, name='Fortnite')
+
+        elif payload.emoji.name == 'eurotruck':
+            role = discord.utils.get(guild.roles, name='EuroTruck Simulator 2')
+
+        elif payload.emoji.name == 'destiny2':
+            role = discord.utils.get(guild.roles, name='Destiny 2')
+
+        elif payload.emoji.name == 'minecraft':
+            role = discord.utils.get(guild.roles, name='Minecraft')
+
+        elif payload.emoji.name == 'paladins':
+            role = discord.utils.get(guild.roles, name='Paladins')
+
+        elif payload.emoji.name == 'chess':
+            role = discord.utils.get(guild.roles, name='Chess')
+
+        else:
+            role = discord.utils.get(guild.roles, name=payload.emoji.name)
+
+        if role:
+            member = guild.get_member(payload.user_id)
+            # member = payload.member
+
+            if member:
+                await member.remove_roles(role)
+                print('done')
+            else:
+                print("Member Not found.")
+        else:
+            print('Role not found.')
 
 @client.event
 async def on_message(message):
@@ -664,6 +733,7 @@ async def ping(ctx):
     delta = pong.created_at - ping.created_at
     delta = int(delta.total_seconds() * 1000)
     await pong.edit(content=f':ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(client.latency, 5)} ms*')
+    time.sleep(1)
 
 @client.command(aliases=['activities'])
 async def games(ctx, *scope):
