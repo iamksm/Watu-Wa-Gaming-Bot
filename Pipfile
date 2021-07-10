@@ -10,7 +10,7 @@ discord-py = "*"
 lavalink = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"
 
 [scripts]
 lava = "java -jar ./Lavalink.jar"
