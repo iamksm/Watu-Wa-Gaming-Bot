@@ -470,6 +470,15 @@ async def on_raw_reaction_remove(payload):
             print("Role not found.")
 
 
+dead_chat = [
+    "dead chat",
+    "ded chat",
+    "chat dead",
+    "dead server",
+    "boring server",
+]
+
+
 @client.event
 async def on_message(message):
     empty_array = []
@@ -505,6 +514,18 @@ async def on_message(message):
             string = message.content
             mod_message = string[index:]
             await member_object.send("[" + message.author.mention + "]" + mod_message)
+
+    elif str(message.content) in dead_chat:
+        dead_chat_replies = [
+            f"{message.author.mention}, Get a life Bruh",
+            f"{message.author.mention}, Try uninstalling the discord",
+            f"{message.author.mention}, You can always leave you know",
+            f"{message.author.mention}, Sorry Sire, how should we {(len(list(client.get_all_members()))) - 1 } members entertain you 😒",
+            f"{message.author.mention}, You need Jesus",
+        ]
+        reply = random.choice(dead_chat_replies)
+        await message.channel.send(reply)
+
     await client.process_commands(message)
 
 
