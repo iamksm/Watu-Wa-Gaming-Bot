@@ -478,6 +478,15 @@ dead_chat = [
     "boring server",
 ]
 
+images = [
+    "https://media1.tenor.com/images/f7ad58f17084a81fde2da96ddaa94edd/tenor.gif?itemid=18146171",
+    "https://media1.tenor.com/images/e2726f8433b913452d9a2f6768c49913/tenor.gif?itemid=4781301",
+    "https://media1.tenor.com/images/55b71cfa4bb363418b3833eaf1ee477d/tenor.gif?itemid=4941248",
+    "https://media1.tenor.com/images/939041d7709c44d052e4ddd1ca2f66a0/tenor.gif?itemid=13295259",
+    "https://media1.tenor.com/images/1f1378bacd3e8cd1c51bf829f4c08f4d/tenor.gif?itemid=22075897",
+    "https://media1.tenor.com/images/1771637ecbf5a19e226b951f3c133f42/tenor.gif?itemid=9304816",
+]
+
 
 @client.event
 async def on_message(message):
@@ -518,13 +527,19 @@ async def on_message(message):
     elif str(message.content) in dead_chat:
         dead_chat_replies = [
             f"{message.author.mention}, Get a life Bruh",
-            f"{message.author.mention}, Try uninstalling the discord",
+            f"{message.author.mention}, Try uninstalling discord",
             f"{message.author.mention}, You can always leave you know",
             f"{message.author.mention}, Sorry Sire, how should we {(len(list(client.get_all_members()))) - 1 } members entertain you 😒",
             f"{message.author.mention}, You need Jesus",
+            images,
         ]
         reply = random.choice(dead_chat_replies)
-        await message.channel.send(reply)
+        if reply is images:
+            embed = discord.Embed(title=message.author.display_name)
+            embed.set_image(url=random.choice(reply))
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send(reply)
 
     await client.process_commands(message)
 
