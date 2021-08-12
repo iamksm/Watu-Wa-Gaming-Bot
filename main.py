@@ -1,16 +1,15 @@
 import asyncio
-import discord
 import os
 import platform
-import praw
-import pytz
 import random
 import time
-
 from collections import Counter
-from discord.ext import commands
-from keep_alive import keep_alive
 
+import discord
+import pytz
+from discord.ext import commands
+
+from keep_alive import keep_alive
 
 intents = discord.Intents.all()
 intents.members = True
@@ -31,20 +30,10 @@ def local_datetime(datetime_obj):
 
 __games__ = [
     (discord.ActivityType.playing, "with iamksm"),
-    (discord.ActivityType.playing, "with HOUDINI"),
     (discord.ActivityType.playing, "with Bloody Actor"),
-    (discord.ActivityType.playing, "with BroChief"),
-    (discord.ActivityType.playing, "with N1ck"),
-    (discord.ActivityType.playing, "with Team Efficiency"),
-    (discord.ActivityType.playing, "with Peaches"),
-    (discord.ActivityType.playing, "with 天皇"),
-    (discord.ActivityType.playing, "with Kyande"),
-    (discord.ActivityType.playing, "with LazyBri4n"),
     (discord.ActivityType.watching, "over {guilds} Server"),
     (discord.ActivityType.watching, "over {members} Members"),
     (discord.ActivityType.watching, "The 254 Millennnial Talk"),
-    (discord.ActivityType.watching, "you right now"),
-    (discord.ActivityType.watching, "Netflix"),
     (discord.ActivityType.listening, "to Podcasts"),
     (discord.ActivityType.listening, "to $ commands"),
 ]
@@ -199,6 +188,9 @@ async def on_raw_reaction_add(payload):
 
         elif payload.emoji.name == "payday2":
             role = discord.utils.get(guild.roles, name="PayDay 2")
+
+        elif payload.emoji.name == "RedDead":
+            role = discord.utils.get(guild.roles, name="Red Dead Redemption")
 
         else:
             role = discord.utils.get(guild.roles, name=payload.emoji.name)
@@ -398,6 +390,9 @@ async def on_raw_reaction_remove(payload):
         elif payload.emoji.name == "payday2":
             role = discord.utils.get(guild.roles, name="PayDay 2")
 
+        elif payload.emoji.name == "RedDead":
+            role = discord.utils.get(guild.roles, name="Red Dead Redemption")
+            
         else:
             role = discord.utils.get(guild.roles, name=payload.emoji.name)
 
@@ -548,7 +543,7 @@ async def on_message(message):
 @client.command()
 async def whois(ctx, member: discord.Member):
     embed = discord.Embed(
-        title=member.name, description=member.mention, color=discord.Color.blue()
+        title=member.name, description=member.mention, color=discord.Color.red()
     )
     embed.add_field(
         name="Name and Tag",
@@ -780,7 +775,7 @@ async def server(ctx):
     icon = str(ctx.guild.icon_url)
 
     embed = discord.Embed(
-        title=name + " Server Info", description=description, color=discord.Color.blue()
+        title=name + " Server Info", description=description, color=discord.Color.red()
     )
     embed.set_thumbnail(url=icon)
     embed.add_field(name="Owner", value=owner, inline=True)
@@ -816,39 +811,6 @@ async def server(ctx):
         embed.add_field(name="Guild Shard", value=ctx.guild.shard_id, inline=True)
 
     embed.set_footer(text="Bot by iamksm")
-    await ctx.send(embed=embed)
-
-
-# The Reddit Functionality
-
-reddit = praw.Reddit(
-    client_id="I2ICX1DOUGndXA",
-    client_secret="AY7g6vz8F1L3WZSOkPlbZ6x5CbXMzw",
-    username="imkossam",
-    password="r1r2l1l2",
-    user_agent="WATU",
-)
-
-# from bs4 import BeautifulSoup
-# import requests
-
-
-@client.command()
-async def memes(ctx):
-
-    subreddit = reddit.subreddit("meme")
-    all_subs = []
-    top = subreddit.top(limit=100)
-
-    for submission in top:
-        all_subs.append(submission)
-    random_sub = random.choice(all_subs)
-
-    name = random_sub.title
-    url = random_sub.url
-
-    embed = discord.Embed(title=name)
-    embed.set_image(url=url)
     await ctx.send(embed=embed)
 
 
