@@ -9,8 +9,6 @@ import discord
 import pytz
 from discord.ext import commands
 
-from keep_alive import keep_alive
-
 intents = discord.Intents.all()
 intents.members = True
 intents.typing = True
@@ -913,5 +911,4 @@ async def games(ctx, *scope):
     await ctx.send(msg)
 
 
-keep_alive()
 client.run(os.getenv("TOKEN"))
