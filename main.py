@@ -724,7 +724,7 @@ async def place(ctx, pos: int):
         else:
             await ctx.send("It is not your turn.")
     else:
-        await ctx.send("Please start a new game using the #tictactoe command.")
+        await ctx.send("Please start a new game using the $tictactoe command.")
 
 
 # Check Winner
