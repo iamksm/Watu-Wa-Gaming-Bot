@@ -392,7 +392,7 @@ async def on_raw_reaction_remove(payload):
 
         elif payload.emoji.name == "RedDead":
             role = discord.utils.get(guild.roles, name="Red Dead Redemption")
-            
+
         else:
             role = discord.utils.get(guild.roles, name=payload.emoji.name)
 
@@ -496,7 +496,9 @@ async def on_message(message):
         if message.attachments != empty_array:
             files = message.attachments
             await modmail_channel.send("[" + message.author.mention + "]")
-            await message.channel.send(f"Hello, {message.author.display_name} The Mods will get back to you shortly")
+            await message.channel.send(
+                f"Hello, {message.author.display_name} The Mods will get back to you shortly"
+            )
 
             for file in files:
                 await modmail_channel.send(file.url)
@@ -505,7 +507,9 @@ async def on_message(message):
             await modmail_channel.send(
                 "[" + message.author.mention + "] " + message.content
             )
-            await message.channel.send(f"Hello, {message.author.display_name} The Mods will get back to you shortly")
+            await message.channel.send(
+                f"Hello, {message.author.display_name} The Mods will get back to you shortly"
+            )
 
     elif str(message.channel) == "👨-moderator-only" and message.content.startswith("<"):
         member_object = message.mentions[0]
