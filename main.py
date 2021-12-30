@@ -8,6 +8,7 @@ from collections import Counter
 import discord
 import pytz
 from discord.ext import commands
+from replit import db
 
 from keep_alive import keep_alive
 
@@ -37,12 +38,16 @@ __games__ = [
     (discord.ActivityType.listening, "to Podcasts"),
     (discord.ActivityType.listening, "to $ commands"),
 ]
-__gamesTimer__ = 60 * 60  # 60 minutes
+__timer__ = 10  # 10 seconds
 
 
 @client.event
 async def on_ready():
     print("Bot's Ready")
+    if not db.get("WATCHED"):
+        db["WATCHED"] = {}
+    if not db.get("TO_BAN"):
+        db["TO_BAN"] = []
     while True:
         guildCount = len(client.guilds)
         memberCount = len(list(client.get_all_members()))
@@ -53,7 +58,14 @@ async def on_ready():
                 name=randomGame[1].format(guilds=guildCount, members=memberCount),
             )
         )
-        await asyncio.sleep(__gamesTimer__)
+        await asyncio.sleep(__timer__)
+        db["WATCHED"] = {}
+
+
+@client.event
+async def on_member_join(member):
+    role = discord.utils.get(member.guild.roles, id=664153716617641995)
+    await member.add_roles(role)
 
 
 @client.command()
@@ -487,11 +499,15 @@ images = [
 async def on_message(message):
     empty_array = []
     modmail_channel = discord.utils.get(
-        client.get_all_channels(), name="👨-moderator-only"
+        client.get_all_channels(), id=745494439455227955
     )
-
     if message.author == client.user:
         return
+
+    bot = discord.ClientUser.bot
+    if message.author is bot:
+        return
+
     if str(message.channel.type) == "private":
         if message.attachments != empty_array:
             files = message.attachments
@@ -515,7 +531,6 @@ async def on_message(message):
         member_object = message.mentions[0]
         if message.attachments != empty_array:
             files = message.attachments
-            await member_object.send("[" + message.author.mention + "]")
 
             for file in files:
                 await member_object.send(file.url)
@@ -523,7 +538,7 @@ async def on_message(message):
             index = message.content.index(" ")
             string = message.content
             mod_message = string[index:]
-            await member_object.send("[" + message.author.mention + "]" + mod_message)
+            await member_object.send(mod_message)
 
     elif str(message.content) in dead_chat:
         dead_chat_replies = [
@@ -542,6 +557,43 @@ async def on_message(message):
         else:
             await message.channel.send(reply)
 
+    guild_id = message.guild.id
+    guild = discord.utils.find(lambda g: g.id == guild_id, client.guilds)
+    role = discord.utils.get(guild.roles, id=778870035779026945)
+
+    # Spamming
+    if message.author.top_role.id == 778870035779026945:
+        await message.guild.ban(
+            message.author, reason="Spamming", delete_message_days=1
+        )
+        await modmail_channel.send(f"{message.author.mention} has been banned")
+        if message.author.name in db["TO_BAN"].value:
+            db["TO_BAN"].value.remove(message.author.name)
+        return
+
+    everyone = discord.utils.get(guild.roles, id=628278524905521177)
+    banned_not_top_role = True
+    if message.author.name in db["WATCHED"].value.keys():
+        db["WATCHED"][message.author.name] += 1
+        if db["WATCHED"][message.author.name] > 5:
+            if message.author.name in db["TO_BAN"].value:
+                # await message.author.add_roles(role)
+                await message.guild.ban(
+                    message.author, reason="Spamming", delete_message_days=1
+                )
+                db["TO_BAN"].value.remove(message.author.name)
+            else:
+                # Give timeout role
+                while banned_not_top_role:
+                    if message.author.top_role != everyone:
+                        await message.author.remove_roles(message.author.top_role)
+                    else:
+                        await message.author.add_roles(role)
+                        banned_not_top_role = False
+                if message.author.name not in db["TO_BAN"].value:
+                    db["TO_BAN"].value.append(message.author.name)
+    else:
+        db["WATCHED"][message.author.name] = 1
     await client.process_commands(message)
 
 
