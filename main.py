@@ -1008,17 +1008,17 @@ async def status(ctx):
     await ctx.send("**:information_source:** Information about this bot:", embed=embed)
 
 
-@client.command()
-async def ping(ctx):
-    """Measure the Response Time"""
-    ping = ctx.message
-    pong = await ctx.send("**:ping_pong:** Pong!")
-    delta = pong.created_at - ping.created_at
-    delta = int(delta.total_seconds() * 1000)
-    await pong.edit(
-        content=f":ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(client.latency, 5)} ms*"
-    )
-    time.sleep(1)
+# @client.command()
+# async def ping(ctx):
+#     """Measure the Response Time"""
+#     ping = ctx.message
+#     pong = await ctx.send("**:ping_pong:** Pong!")
+#     delta = pong.created_at - ping.created_at
+#     delta = int(delta.total_seconds() * 1000)
+#     await pong.edit(
+#         content=f":ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(client.latency, 5)} ms*"
+#     )
+#     time.sleep(1)
 
 
 @client.command(aliases=["activities"])
