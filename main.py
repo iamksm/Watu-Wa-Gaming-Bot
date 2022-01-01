@@ -639,23 +639,23 @@ async def on_message(message):
               message.author, reason="Spamming", delete_message_days=1
           )
           await modmail_channel.send(f"{message.author.mention} has been banned")
-          if message.author.name in db["TO_BAN"].value:
-              db["TO_BAN"].value.remove(message.author.name)
+          if message.author.name in db["TO_BAN"]:
+              db["TO_BAN"].remove(message.author.name)
           return
     except:
         pass
 
     everyone = discord.utils.get(guild.roles, id=628278524905521177)
     banned_not_top_role = True
-    if message.author.name in db["WATCHED"].value.keys():
+    if message.author.name in db["WATCHED"].keys():
         db["WATCHED"][message.author.name] += 1
         if db["WATCHED"][message.author.name] > 10:
-            if message.author.name in db["TO_BAN"].value:
+            if message.author.name in db["TO_BAN"]:
                 # await message.author.add_roles(role)
                 await message.guild.ban(
                     message.author, reason="Spamming", delete_message_days=1
                 )
-                db["TO_BAN"].value.remove(message.author.name)
+                db["TO_BAN"].remove(message.author.name)
             else:
                 # Give timeout role
                 while banned_not_top_role:
@@ -664,8 +664,8 @@ async def on_message(message):
                     else:
                         await message.author.add_roles(role)
                         banned_not_top_role = False
-                if message.author.name not in db["TO_BAN"].value:
-                    db["TO_BAN"].value.append(message.author.name)
+                if message.author.name not in db["TO_BAN"]:
+                    db["TO_BAN"].append(message.author.name)
     else:
         db["WATCHED"][message.author.name] = 1
     await client.process_commands(message)
