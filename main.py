@@ -4,15 +4,12 @@ import platform
 import random
 import time
 from collections import Counter
+
+import discord
+import pytz
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from youtube_dl import YoutubeDL
-import discord
-import pytz
-from config import config
-from musicbot.audiocontroller import AudioController
-from musicbot.settings import Settings
-from musicbot.utils import guild_to_audiocontroller, guild_to_settings
 
 from keep_alive import keep_alive
 
@@ -82,7 +79,7 @@ async def on_ready():
                 name=randomGame[1].format(guilds=guildCount, members=memberCount),
             )
         )
-        for guild in bot.guilds:
+        for guild in client.guilds:
             await register(guild)
             print("Joined {}".format(guild.name))
 
@@ -99,7 +96,7 @@ async def on_guild_join(guild):
 async def register(guild):
 
     guild_to_settings[guild] = Settings(guild)
-    guild_to_audiocontroller[guild] = AudioController(bot, guild)
+    guild_to_audiocontroller[guild] = AudioController(client, guild)
 
     sett = guild_to_settings[guild]
 
