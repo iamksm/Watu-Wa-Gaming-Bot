@@ -41,11 +41,12 @@ __games__ = [
 ]
 __timer__ = 10  # 10 seconds
 
+db = {}
+
 
 @client.event
 async def on_ready():
     print("Bot's Ready")
-    db = {}
     if not db.get("WATCHED"):
         db["WATCHED"] = {}
     if not db.get("TO_BAN"):
