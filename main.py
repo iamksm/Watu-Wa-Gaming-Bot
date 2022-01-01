@@ -73,6 +73,7 @@ async def on_ready():
         db["WATCHED"] = {}
     if not db.get("TO_BAN"):
         db["TO_BAN"] = []
+    print(config.STARTUP_COMPLETE_MESSAGE)
     while True:
         guildCount = len(client.guilds)
         memberCount = len(list(client.get_all_members()))
@@ -86,8 +87,6 @@ async def on_ready():
         for guild in client.guilds:
             await register(guild)
             print("Joined {}".format(guild.name))
-
-        print(config.STARTUP_COMPLETE_MESSAGE)
         await asyncio.sleep(__timer__)
         db["WATCHED"] = {}
 
