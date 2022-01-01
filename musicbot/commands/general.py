@@ -74,7 +74,7 @@ class General(commands.Cog):
         delta = pong.created_at - ping.created_at
         delta = int(delta.total_seconds() * 1000)
         await pong.edit(
-            content=f":ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(client.latency, 5)} ms*"
+            content=f":ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(self.bot.latency, 5)} ms*"
         )
         time.sleep(1)
 
