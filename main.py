@@ -13,6 +13,8 @@ from youtube_dl import YoutubeDL
 
 from config import config
 from keep_alive import keep_alive
+from musicbot.settings import Settings
+from musicbot.utils import guild_to_audiocontroller, guild_to_settings
 
 intents = discord.Intents.all()
 intents.members = True
@@ -1046,4 +1048,4 @@ async def games(ctx, *scope):
 
 
 keep_alive()
-client.run(os.getenv("TOKEN"))
+client.run(os.getenv("TOKEN"), bot=True, reconnect=True)
