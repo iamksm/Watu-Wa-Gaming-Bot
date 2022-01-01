@@ -18,13 +18,13 @@ class General(commands.Cog):
         self.bot = bot
 
     # logic is split to uconnect() for wide usage
-    @commands.command(name='connect', description=config.HELP_CONNECT_LONG, help=config.HELP_CONNECT_SHORT, aliases=['c'])
+    @commands.command(name='join', description=config.HELP_CONNECT_LONG, help=config.HELP_CONNECT_SHORT, aliases=['c'])
     async def _connect(self, ctx):  # dest_channel_name: str
         current_guild = utils.get_guild(self.bot, ctx.message)
         audiocontroller = utils.guild_to_audiocontroller[current_guild]
         await audiocontroller.uconnect(ctx)
 
-    @commands.command(name='disconnect', description=config.HELP_DISCONNECT_LONG, help=config.HELP_DISCONNECT_SHORT, aliases=['dc'])
+    @commands.command(name='leave', description=config.HELP_DISCONNECT_LONG, help=config.HELP_DISCONNECT_SHORT, aliases=['dc'])
     async def _disconnect(self, ctx, guild=False):
         current_guild = utils.get_guild(self.bot, ctx.message)
         audiocontroller = utils.guild_to_audiocontroller[current_guild]
@@ -69,7 +69,14 @@ class General(commands.Cog):
 
     @commands.command(name='ping', description=config.HELP_PING_LONG, help=config.HELP_PING_SHORT)
     async def _ping(self, ctx):
-        await ctx.send("Pong")
+        ping = ctx.message
+        pong = await ctx.send("**:ping_pong:** Pong!")
+        delta = pong.created_at - ping.created_at
+        delta = int(delta.total_seconds() * 1000)
+        await pong.edit(
+            content=f":ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(client.latency, 5)} ms*"
+        )
+        time.sleep(1)
 
     @commands.command(name='setting', description=config.HELP_SHUFFLE_LONG, help=config.HELP_SETTINGS_SHORT, aliases=['settings', 'set'])
     @has_permissions(administrator=True)
@@ -91,12 +98,12 @@ class General(commands.Cog):
         elif response is True:
             await ctx.send("Setting updated!")
 
-    @commands.command(name='addbot', description=config.HELP_ADDBOT_LONG, help=config.HELP_ADDBOT_SHORT)
-    async def _addbot(self, ctx):
-        embed = discord.Embed(title="Invite", description=config.ADD_MESSAGE +
-                              "(https://discordapp.com/oauth2/authorize?client_id={}&scope=bot>)".format(self.bot.user.id))
+    # @commands.command(name='addbot', description=config.HELP_ADDBOT_LONG, help=config.HELP_ADDBOT_SHORT)
+    # async def _addbot(self, ctx):
+    #     embed = discord.Embed(title="Invite", description=config.ADD_MESSAGE +
+    #                           "(https://discordapp.com/oauth2/authorize?client_id={}&scope=bot>)".format(self.bot.user.id))
 
-        await ctx.send(embed=embed)
+    #     await ctx.send(embed=embed)
 
 
 def setup(bot):

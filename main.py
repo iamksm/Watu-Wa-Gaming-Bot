@@ -146,15 +146,15 @@ async def purge(ctx, amount=10):
     await ctx.channel.purge(limit=amount)
 
 
-@client.command()
-async def join(ctx):
-    channel = ctx.author.voice.channel
-    await channel.connect()
+# @client.command()
+# async def join(ctx):
+#     channel = ctx.author.voice.channel
+#     await channel.connect()
 
 
-@client.command()
-async def leave(ctx):
-    await ctx.voice_client.disconnect()
+# @client.command()
+# async def leave(ctx):
+#     await ctx.voice_client.disconnect()
 
 
 @client.event
