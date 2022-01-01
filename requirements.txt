@@ -3,3 +3,5 @@ discord
 youtube_dl
 pytz
 flask
+aiohttp==3.7.4.post0
+async-timeout==3.0.1
