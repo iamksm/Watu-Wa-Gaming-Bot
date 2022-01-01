@@ -13,6 +13,7 @@ from youtube_dl import YoutubeDL
 
 from config import config
 from keep_alive import keep_alive
+from musicbot.audiocontroller import AudioController
 from musicbot.settings import Settings
 from musicbot.utils import guild_to_audiocontroller, guild_to_settings
 
@@ -138,6 +139,11 @@ async def on_member_join(member):
 @client.command()
 async def hello(ctx):
     await ctx.send("Hello " + str(ctx.author.display_name) + ", What's up?")
+
+
+@client.command()
+async def readd(ctx):
+    await register(guild)
 
 
 @client.command()

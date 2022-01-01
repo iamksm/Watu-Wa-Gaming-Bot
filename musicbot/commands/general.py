@@ -1,3 +1,5 @@
+import time
+
 import discord
 from config import config
 from discord.ext import commands
