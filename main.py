@@ -1043,6 +1043,5 @@ async def games(ctx, *scope):
     await ctx.send(msg)
 
 
-if __name__ == '__main__':
-  keep_alive()
-  client.run(os.getenv("TOKEN"))
+keep_alive()
+client.run(os.getenv("TOKEN"))
