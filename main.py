@@ -9,7 +9,10 @@ from discord.ext import commands
 from youtube_dl import YoutubeDL
 import discord
 import pytz
-# from replit import db
+from config import config
+from musicbot.audiocontroller import AudioController
+from musicbot.settings import Settings
+from musicbot.utils import guild_to_audiocontroller, guild_to_settings
 
 from keep_alive import keep_alive
 
@@ -19,7 +22,9 @@ intents.typing = True
 intents.presences = True
 intents.reactions = True
 
-client = commands.Bot(command_prefix="$", intents=intents)
+initial_extensions = ['musicbot.commands.music',
+                      'musicbot.commands.general', 'musicbot.plugins.button']
+client = commands.Bot(command_prefix="$", intents=intents, pm_help=True, case_insensitive=True)
 
 # Bot Status
 
@@ -44,9 +49,25 @@ __timer__ = 10  # 10 seconds
 db = {}
 
 
+if __name__ == '__main__':
+
+    config.ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
+    config.COOKIE_PATH = config.ABSOLUTE_PATH + config.COOKIE_PATH
+
+    if config.BOT_TOKEN == "":
+        print("Error: No bot token!")
+        exit
+
+    for extension in initial_extensions:
+        try:
+            client.load_extension(extension)
+        except Exception as e:
+            print(e)
+
+
 @client.event
 async def on_ready():
-    print("Bot's Ready")
+    print(config.STARTUP_MESSAGE)
     if not db.get("WATCHED"):
         db["WATCHED"] = {}
     if not db.get("TO_BAN"):
@@ -61,8 +82,51 @@ async def on_ready():
                 name=randomGame[1].format(guilds=guildCount, members=memberCount),
             )
         )
+        for guild in bot.guilds:
+            await register(guild)
+            print("Joined {}".format(guild.name))
+
+    print(config.STARTUP_COMPLETE_MESSAGE)
         await asyncio.sleep(__timer__)
         db["WATCHED"] = {}
+
+@client.event
+async def on_guild_join(guild):
+    print(guild.name)
+    await register(guild)
+
+
+async def register(guild):
+
+    guild_to_settings[guild] = Settings(guild)
+    guild_to_audiocontroller[guild] = AudioController(bot, guild)
+
+    sett = guild_to_settings[guild]
+
+    try:
+        await guild.me.edit(nick=sett.get('default_nickname'))
+    except:
+        pass
+
+    if config.GLOBAL_DISABLE_AUTOJOIN_VC == True:
+        return
+
+    vc_channels = guild.voice_channels
+
+    if sett.get('vc_timeout') == False:
+        if sett.get('start_voice_channel') == None:
+            try:
+                await guild_to_audiocontroller[guild].register_voice_channel(guild.voice_channels[0])
+            except Exception as e:
+                print(e)
+
+        else:
+            for vc in vc_channels:
+                if vc.id == sett.get('start_voice_channel'):
+                    try:
+                        await guild_to_audiocontroller[guild].register_voice_channel(vc_channels[vc_channels.index(vc)])
+                    except Exception as e:
+                        print(e)
 
 
 @client.event
