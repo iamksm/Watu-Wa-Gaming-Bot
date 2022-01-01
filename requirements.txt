@@ -1,0 +1,5 @@
+pynacl
+discord
+youtube_dl
+pytz
+flask

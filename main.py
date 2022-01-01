@@ -4,10 +4,11 @@ import platform
 import random
 import time
 from collections import Counter
-
+from discord import FFmpegPCMAudio
+from discord.ext import commands
+from youtube_dl import YoutubeDL
 import discord
 import pytz
-from discord.ext import commands
 from replit import db
 
 from keep_alive import keep_alive
@@ -77,6 +78,74 @@ async def hello(ctx):
 @commands.has_permissions(manage_messages=True)
 async def clear(ctx, amount=10):
     await ctx.channel.purge(limit=amount)
+
+
+@client.command()
+async def join(ctx):
+    channel = ctx.author.voice.channel
+    await channel.connect()
+
+
+@client.command()
+async def leave(ctx):
+    await ctx.voice_client.disconnect()
+
+
+@client.command()
+async def stop(ctx):
+    voice = ctx.author.guild.voice_client
+    try:
+        if voice.is_playing() or voice.is_paused():
+            voice.stop()
+    except Exception:
+        await ctx.send("Unable to stop")
+
+
+@client.command()
+async def pause(ctx):
+    voice = ctx.author.guild.voice_client
+    try:
+        if voice.is_playing():
+            voice.pause()
+    except Exception:
+        await ctx.send("Unable to pause")
+
+
+@client.command()
+async def resume(ctx):
+    voice = ctx.author.guild.voice_client
+    try:
+        if voice.is_paused() or voice.is_stopped():
+            voice.resume()
+    except Exception:
+        await ctx.send("Unable to resume")
+
+
+@client.command()
+async def play(ctx, *url):
+    try:
+        channel = ctx.author.voice.channel
+        await channel.connect()
+    except Exception:
+        pass
+
+    YDL_OPTIONS = {"format": "bestaudio", "noplaylist": "True"}
+    FFMPEG_OPTIONS = {
+        "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+        "options": "-vn",
+    }
+    voice = ctx.author.guild.voice_client
+    if len(url) == 2:
+        url = " ".join(url)
+    if not voice.is_playing():
+        with YoutubeDL(YDL_OPTIONS) as ydl:
+            info = ydl.extract_info(f"ytsearch:{url}", download=False)
+        URL = info["entries"][0]["url"]
+        voice.play(FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
+        voice.is_playing()
+    else:
+        await ctx.send(f"We are currently playing something, run #stop then try again")
+        return
 
 
 @client.event
@@ -562,20 +631,23 @@ async def on_message(message):
     role = discord.utils.get(guild.roles, id=778870035779026945)
 
     # Spamming
-    if message.author.top_role.id == 778870035779026945:
-        await message.guild.ban(
-            message.author, reason="Spamming", delete_message_days=1
-        )
-        await modmail_channel.send(f"{message.author.mention} has been banned")
-        if message.author.name in db["TO_BAN"].value:
-            db["TO_BAN"].value.remove(message.author.name)
-        return
+    try:
+      if message.author.top_role.id == 778870035779026945:
+          await message.guild.ban(
+              message.author, reason="Spamming", delete_message_days=1
+          )
+          await modmail_channel.send(f"{message.author.mention} has been banned")
+          if message.author.name in db["TO_BAN"].value:
+              db["TO_BAN"].value.remove(message.author.name)
+          return
+    except:
+        pass
 
     everyone = discord.utils.get(guild.roles, id=628278524905521177)
     banned_not_top_role = True
     if message.author.name in db["WATCHED"].value.keys():
         db["WATCHED"][message.author.name] += 1
-        if db["WATCHED"][message.author.name] > 5:
+        if db["WATCHED"][message.author.name] > 10:
             if message.author.name in db["TO_BAN"].value:
                 # await message.author.add_roles(role)
                 await message.guild.ban(
