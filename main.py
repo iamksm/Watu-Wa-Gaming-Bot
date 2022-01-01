@@ -7,11 +7,11 @@ from collections import Counter
 
 import discord
 import pytz
-from . import config
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from youtube_dl import YoutubeDL
 
+from config import config
 from keep_alive import keep_alive
 
 intents = discord.Intents.all()
