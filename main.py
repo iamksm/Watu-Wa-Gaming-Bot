@@ -142,7 +142,7 @@ async def hello(ctx):
 
 @client.command()
 @commands.has_permissions(manage_messages=True)
-async def clear(ctx, amount=10):
+async def purge(ctx, amount=10):
     await ctx.channel.purge(limit=amount)
 
 
