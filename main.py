@@ -4,14 +4,18 @@ import platform
 import random
 import time
 from collections import Counter
+
+import discord
+import pytz
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from youtube_dl import YoutubeDL
-import discord
-import pytz
-# from replit import db
 
+from config import config
 from keep_alive import keep_alive
+from musicbot.audiocontroller import AudioController
+from musicbot.settings import Settings
+from musicbot.utils import guild_to_audiocontroller, guild_to_settings
 
 intents = discord.Intents.all()
 intents.members = True
@@ -19,7 +23,9 @@ intents.typing = True
 intents.presences = True
 intents.reactions = True
 
-client = commands.Bot(command_prefix="$", intents=intents)
+initial_extensions = ['musicbot.commands.music',
+                      'musicbot.commands.general', 'musicbot.plugins.button']
+client = commands.Bot(command_prefix="$", intents=intents, pm_help=True, case_insensitive=True)
 
 # Bot Status
 
@@ -44,13 +50,30 @@ __timer__ = 10  # 10 seconds
 db = {}
 
 
+if __name__ == '__main__':
+
+    config.ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
+    config.COOKIE_PATH = config.ABSOLUTE_PATH + config.COOKIE_PATH
+
+    if config.BOT_TOKEN == "":
+        print("Error: No bot token!")
+        exit
+
+    for extension in initial_extensions:
+        try:
+            client.load_extension(extension)
+        except Exception as e:
+            print(e)
+
+
 @client.event
 async def on_ready():
-    print("Bot's Ready")
+    print(config.STARTUP_MESSAGE)
     if not db.get("WATCHED"):
         db["WATCHED"] = {}
     if not db.get("TO_BAN"):
         db["TO_BAN"] = []
+    print(config.STARTUP_COMPLETE_MESSAGE)
     while True:
         guildCount = len(client.guilds)
         memberCount = len(list(client.get_all_members()))
@@ -61,8 +84,49 @@ async def on_ready():
                 name=randomGame[1].format(guilds=guildCount, members=memberCount),
             )
         )
+        for guild in client.guilds:
+            await register(guild)
+            print("Joined {}".format(guild.name))
         await asyncio.sleep(__timer__)
         db["WATCHED"] = {}
+
+@client.event
+async def on_guild_join(guild):
+    print(guild.name)
+    await register(guild)
+
+
+async def register(guild):
+
+    guild_to_settings[guild] = Settings(guild)
+    guild_to_audiocontroller[guild] = AudioController(client, guild)
+
+    sett = guild_to_settings[guild]
+
+    try:
+        await guild.me.edit(nick=sett.get('default_nickname'))
+    except:
+        pass
+
+    if config.GLOBAL_DISABLE_AUTOJOIN_VC == True:
+        return
+
+    vc_channels = guild.voice_channels
+
+    if sett.get('vc_timeout') == False:
+        if sett.get('start_voice_channel') == None:
+            try:
+                await guild_to_audiocontroller[guild].register_voice_channel(guild.voice_channels[0])
+            except Exception as e:
+                print(e)
+
+        else:
+            for vc in vc_channels:
+                if vc.id == sett.get('start_voice_channel'):
+                    try:
+                        await guild_to_audiocontroller[guild].register_voice_channel(vc_channels[vc_channels.index(vc)])
+                    except Exception as e:
+                        print(e)
 
 
 @client.event
@@ -77,77 +141,25 @@ async def hello(ctx):
 
 
 @client.command()
+async def readd(ctx):
+    await register(ctx.guild)
+
+
+@client.command()
 @commands.has_permissions(manage_messages=True)
-async def clear(ctx, amount=10):
+async def purge(ctx, amount=10):
     await ctx.channel.purge(limit=amount)
 
 
-@client.command()
-async def join(ctx):
-    channel = ctx.author.voice.channel
-    await channel.connect()
+# @client.command()
+# async def join(ctx):
+#     channel = ctx.author.voice.channel
+#     await channel.connect()
 
 
-@client.command()
-async def leave(ctx):
-    await ctx.voice_client.disconnect()
-
-
-@client.command()
-async def stop(ctx):
-    voice = ctx.author.guild.voice_client
-    try:
-        if voice.is_playing() or voice.is_paused():
-            voice.stop()
-    except Exception:
-        await ctx.send("Unable to stop")
-
-
-@client.command()
-async def pause(ctx):
-    voice = ctx.author.guild.voice_client
-    try:
-        if voice.is_playing():
-            voice.pause()
-    except Exception:
-        await ctx.send("Unable to pause")
-
-
-@client.command()
-async def resume(ctx):
-    voice = ctx.author.guild.voice_client
-    try:
-        if voice.is_paused() or voice.is_stopped():
-            voice.resume()
-    except Exception:
-        await ctx.send("Unable to resume")
-
-
-@client.command()
-async def play(ctx, *url):
-    try:
-        channel = ctx.author.voice.channel
-        await channel.connect()
-    except Exception:
-        pass
-
-    YDL_OPTIONS = {"format": "bestaudio", "noplaylist": "True"}
-    FFMPEG_OPTIONS = {
-        "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        "options": "-vn",
-    }
-    voice = ctx.author.guild.voice_client
-    if len(url) == 2:
-        url = " ".join(url)
-    if not voice.is_playing():
-        with YoutubeDL(YDL_OPTIONS) as ydl:
-            info = ydl.extract_info(f"ytsearch:{url}", download=False)
-        URL = info["entries"][0]["url"]
-        voice.play(FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
-        voice.is_playing()
-    else:
-        await ctx.send(f"We are currently playing something, run #stop then try again")
-        return
+# @client.command()
+# async def leave(ctx):
+#     await ctx.voice_client.disconnect()
 
 
 @client.event
@@ -1001,17 +1013,17 @@ async def status(ctx):
     await ctx.send("**:information_source:** Information about this bot:", embed=embed)
 
 
-@client.command()
-async def ping(ctx):
-    """Measure the Response Time"""
-    ping = ctx.message
-    pong = await ctx.send("**:ping_pong:** Pong!")
-    delta = pong.created_at - ping.created_at
-    delta = int(delta.total_seconds() * 1000)
-    await pong.edit(
-        content=f":ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(client.latency, 5)} ms*"
-    )
-    time.sleep(1)
+# @client.command()
+# async def ping(ctx):
+#     """Measure the Response Time"""
+#     ping = ctx.message
+#     pong = await ctx.send("**:ping_pong:** Pong!")
+#     delta = pong.created_at - ping.created_at
+#     delta = int(delta.total_seconds() * 1000)
+#     await pong.edit(
+#         content=f":ping_pong: Pong! ({delta} ms)\n*Discord WebSocket latency: {round(client.latency, 5)} ms*"
+#     )
+#     time.sleep(1)
 
 
 @client.command(aliases=["activities"])
@@ -1041,4 +1053,4 @@ async def games(ctx, *scope):
 
 
 keep_alive()
-client.run(os.getenv("TOKEN"))
+client.run(os.getenv("TOKEN"), bot=True, reconnect=True)
