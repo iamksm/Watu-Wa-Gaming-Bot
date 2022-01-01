@@ -142,7 +142,7 @@ async def hello(ctx):
 
 @client.command()
 async def readd(ctx):
-    await register(guild)
+    await register(ctx.guild)
 
 
 @client.command()
