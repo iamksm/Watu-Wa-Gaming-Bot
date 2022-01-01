@@ -86,7 +86,7 @@ async def on_ready():
             await register(guild)
             print("Joined {}".format(guild.name))
 
-    print(config.STARTUP_COMPLETE_MESSAGE)
+        print(config.STARTUP_COMPLETE_MESSAGE)
         await asyncio.sleep(__timer__)
         db["WATCHED"] = {}
 
@@ -155,63 +155,6 @@ async def join(ctx):
 @client.command()
 async def leave(ctx):
     await ctx.voice_client.disconnect()
-
-
-@client.command()
-async def stop(ctx):
-    voice = ctx.author.guild.voice_client
-    try:
-        if voice.is_playing() or voice.is_paused():
-            voice.stop()
-    except Exception:
-        await ctx.send("Unable to stop")
-
-
-@client.command()
-async def pause(ctx):
-    voice = ctx.author.guild.voice_client
-    try:
-        if voice.is_playing():
-            voice.pause()
-    except Exception:
-        await ctx.send("Unable to pause")
-
-
-@client.command()
-async def resume(ctx):
-    voice = ctx.author.guild.voice_client
-    try:
-        if voice.is_paused() or voice.is_stopped():
-            voice.resume()
-    except Exception:
-        await ctx.send("Unable to resume")
-
-
-@client.command()
-async def play(ctx, *url):
-    try:
-        channel = ctx.author.voice.channel
-        await channel.connect()
-    except Exception:
-        pass
-
-    YDL_OPTIONS = {"format": "bestaudio", "noplaylist": "True"}
-    FFMPEG_OPTIONS = {
-        "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        "options": "-vn",
-    }
-    voice = ctx.author.guild.voice_client
-    if len(url) == 2:
-        url = " ".join(url)
-    if not voice.is_playing():
-        with YoutubeDL(YDL_OPTIONS) as ydl:
-            info = ydl.extract_info(f"ytsearch:{url}", download=False)
-        URL = info["entries"][0]["url"]
-        voice.play(FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
-        voice.is_playing()
-    else:
-        await ctx.send(f"We are currently playing something, run #stop then try again")
-        return
 
 
 @client.event
