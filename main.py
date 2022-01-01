@@ -7,6 +7,7 @@ from collections import Counter
 
 import discord
 import pytz
+from . import config
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from youtube_dl import YoutubeDL
