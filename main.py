@@ -9,7 +9,7 @@ from discord.ext import commands
 from youtube_dl import YoutubeDL
 import discord
 import pytz
-from replit import db
+# from replit import db
 
 from keep_alive import keep_alive
 
@@ -45,6 +45,7 @@ __timer__ = 10  # 10 seconds
 @client.event
 async def on_ready():
     print("Bot's Ready")
+    db = {}
     if not db.get("WATCHED"):
         db["WATCHED"] = {}
     if not db.get("TO_BAN"):
@@ -695,11 +696,6 @@ async def whois(ctx, member: discord.Member):
         ),
         inline=False,
     )
-
-    # import pdb; pdb.set_trace()
-    # if member in ctx.author.friends:
-    #   # print("{} is on my friends list!".format(member.name))
-    #   embed.add_field(name = "Are you Friends?" , value = member.is_friend(), inline = True)
 
     all_activities = []
     spotify = None
