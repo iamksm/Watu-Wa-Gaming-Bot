@@ -73,7 +73,17 @@ async def on_ready():
         db["WATCHED"] = {}
     if not db.get("TO_BAN"):
         db["TO_BAN"] = []
+    
+    for guild in client.guilds:
+        await register(guild)
+        print("Joined {}".format(guild.name))
+    
+    __version__ = "1.10.1"
+    client.commands_used = Counter()
+
     print(config.STARTUP_COMPLETE_MESSAGE)
+    client.startTime = time.time()
+    
     while True:
         guildCount = len(client.guilds)
         memberCount = len(list(client.get_all_members()))
@@ -84,9 +94,6 @@ async def on_ready():
                 name=randomGame[1].format(guilds=guildCount, members=memberCount),
             )
         )
-        for guild in client.guilds:
-            await register(guild)
-            print("Joined {}".format(guild.name))
         await asyncio.sleep(__timer__)
         db["WATCHED"] = {}
 
@@ -142,6 +149,7 @@ async def hello(ctx):
 
 @client.command()
 async def readd(ctx):
+    print(guild.name)
     await register(ctx.guild)
 
 
@@ -956,15 +964,10 @@ async def server(ctx):
 @client.command(aliases=["uptime", "up"])
 async def status(ctx):
     """Info about the bot"""
-    client.startTime = time.time()
     timeUp = time.time() - client.startTime
     hours = timeUp / 3600
     minutes = (timeUp / 60) % 60
     seconds = timeUp % 60
-
-    client.commands_used = Counter()
-
-    __version__ = "1.8.1"
     client.botVersion = __version__
 
     client.AppInfo = await client.application_info()
@@ -987,7 +990,7 @@ async def status(ctx):
         channel += len(guild.channels)
 
     embed = discord.Embed(color=ctx.me.top_role.colour)
-    embed.set_footer(text="Bot Created by iamksm#8749")
+    embed.set_footer(text="Bot Created by iamksm#5137")
     embed.set_thumbnail(url=ctx.me.avatar_url)
     embed.add_field(name="Bot Admin", value=admin, inline=False)
     embed.add_field(
